@@ -4,27 +4,27 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "link/link.h"
 
-int initLinkLayer()
+int initLinkLayer(int addAllDev)
 {
+    memset((void *)&BROAD_MAC, 0xff, sizeof(BROAD_MAC));
     static int _initialized = 0;
     if (_initialized == 1)
-    {
-        fprintf(stderr, "Network device management system has been initialized!\n");
         return 1;
-    }
 
-    deviceListHead = (struct Device *)malloc(sizeof(struct Device));
-    if (deviceListHead == NULL)
+    deviceList.head = (struct Device *)malloc(sizeof(struct Device));
+    if (deviceList.head == NULL)
     {
         fprintf(stderr, "Fail to initialize network device management system!\n");
         return -1;
     }
     _initialized = 1;
-    deviceDescriptorCount = 0;
-    deviceListHead->nextPointer = NULL;
-    deviceListTail = deviceListHead;
-    linkCallback = NULL;
+    deviceList.maxcount = 0;
+    deviceList.head->nextPointer = NULL;
+    deviceList.tail = deviceList.head;
+    if(addAllDev)
+        addAllDevice();
     return 0;
 }

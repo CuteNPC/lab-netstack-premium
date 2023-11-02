@@ -43,7 +43,7 @@ int main()
     {
         size_t data_len = strlen(data);
         data[data_len - 1] = 0;
-        int res = sendFrame(data, data_len, 0x0800, desaddr, device_id);
+        int res = sendFrame(data, data_len, 0x0800, *(struct MacAddr *)desaddr, device_id);
         if (res == 0)
             printf("Succeed to send: %s\n", data);
     }

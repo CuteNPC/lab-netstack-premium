@@ -9,6 +9,7 @@
 
 #include <pcap.h>
 #include "link/ethheader.h"
+// #include "network/ipheader.h"
 
 struct Device
 {
@@ -17,11 +18,18 @@ struct Device
     struct Device *nextPointer;
     int32_t deviceDescriptor;
     struct MacAddr macAddr;
+    uint32_t ipAddr;
+    // struct IPv6Addr ipv6Addr;
 };
 
-extern struct Device *deviceListHead;
-extern struct Device *deviceListTail;
-extern int deviceDescriptorCount;
+struct DeviceList
+{
+    struct Device *head;
+    struct Device *tail;
+    int maxcount;
+};
+
+extern struct DeviceList deviceList;
 
 /**
  * @brief Add a device to the library for sending/receiving packets.
@@ -29,7 +37,7 @@ extern int deviceDescriptorCount;
  * @param deviceName Name of network device to send/receive frame on.
  * @return A non -negative _device -ID_ on success , -1 on error.
  */
-int addDevice(const char *deviceName);
+struct Device *addDevice(const char *deviceName);
 
 /**
  * @brief Find a device added by ‘addDevice ‘.
@@ -37,7 +45,7 @@ int addDevice(const char *deviceName);
  * @param deviceName Name of network device to send/receive frame on.
  * @return A non -negative _device -ID_ on success , -1 on error.
  */
-int findDevice(const char *deviceName);
+struct Device *findDevice(const char *deviceName);
 
 /**
  * @brief Get the MAC address of a device.
@@ -45,7 +53,7 @@ int findDevice(const char *deviceName);
  * @param deviceDescriptor Name of network device to send/receive frame on.
  * @return A non -negative _device -ID_ on success , -1 on error.
  */
-uint8_t *getMacAddr(int deviceDescriptor);
+struct MacAddr getMacAddr(struct Device *);
 
 /**
  * @brief Find a device added by ‘addDevice ‘.
@@ -54,5 +62,16 @@ uint8_t *getMacAddr(int deviceDescriptor);
  * @return A device pointer , NULL on error.
  */
 struct Device *findDeviceByDescriptorRetPtr(int deviceDescriptor);
+
+/**
+ * @brief Get the first Ethernet device ‘.
+ *
+ * @return A device pointer , NULL on error.
+ */
+
+struct Device *getFirstDevice();
+
+
+int addAllDevice();
 
 #endif

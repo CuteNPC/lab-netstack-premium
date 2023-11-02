@@ -11,12 +11,13 @@
 #include <pcap.h>
 #include "link/device.h"
 #include "link/frame.h"
+#include "link/ethheader.h"
 
 /**
  * @brief Initialize device management.
  *
  * @return 0 for success, -1 for failure, and 1 if it has already been initialized before.
  */
-int initLinkLayer();
+int initLinkLayer(int addAllDev);
 
 #endif

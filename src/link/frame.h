@@ -8,6 +8,7 @@
 
 #include <pcap.h>
 #include "link/ethheader.h"
+#include "link/device.h"
 
 /**
  * @brief Process the dataload upon receiving it.
@@ -20,11 +21,12 @@
  * @return 0 on success , -1 on error.
  *
  */
-typedef int (*frameReceiveCallback)(const void *, uint32_t, int, struct EthHeader);
+typedef int (*frameReceiveCallback)(const void *, uint32_t, struct EthHeader, struct Device *);
 
-extern frameReceiveCallback linkCallback;
+extern frameReceiveCallback linkCallback[64];
+extern int linkCallbackCnt;
 
-int sendFrame(const void *buf, int len, int ethtype, const void *destmac, int deviceDescriptor);
+int sendFrame(const void *buf, int len, int ethtype, struct MacAddr destMac, struct Device *);
 
 /**
  * @brief "Receive Ethernet frames from a device.
@@ -33,7 +35,7 @@ int sendFrame(const void *buf, int len, int ethtype, const void *destmac, int de
  * @param cnt The number of Ethernet frames to receive.
  * @return 0 on success , -1 on error.
  */
-int receiveFrame(int deviceDescriptor, int cnt);
+int receiveFrame(struct Device *device, int cnt);
 
 /**
  * @brief Register a callback function to be called each time an
@@ -44,5 +46,7 @@ int receiveFrame(int deviceDescriptor, int cnt);
  * @see frameReceiveCallback
  */
 int setFrameReceiveCallback(frameReceiveCallback callback);
+
+int loopCycle();
 
 #endif

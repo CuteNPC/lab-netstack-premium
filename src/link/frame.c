@@ -14,14 +14,19 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <linux/if_packet.h>
+#include <pthread.h>
 
 #include "link/frame.h"
 #include "link/device.h"
 #include "link/ethheader.h"
+#include "network/ippacket.h"
+#include "utils/time.h"
+#include "network/arp.h"
 
-frameReceiveCallback linkCallback;
+frameReceiveCallback linkCallback[64];
+int linkCallbackCnt;
 
-int sendFrame(const void *buf, int len, int ethType, const void *destMac, int deviceDescriptor)
+int sendFrame(const void *buf, int len, int ethType, struct MacAddr destMac, struct Device *device)
 {
     uint8_t frame[0x10000];
     if (len > 0x10000 - sizeof(struct EthHeader) || len <= 0)
@@ -30,16 +35,9 @@ int sendFrame(const void *buf, int len, int ethType, const void *destMac, int de
         return -1;
     }
 
-    struct Device *device = findDeviceByDescriptorRetPtr(deviceDescriptor);
-    if (device == NULL)
-    {
-        fprintf(stderr, "Device not found!\n");
-        return -1;
-    }
-
     /* Set up the header. */
     *(struct EthHeader *)frame = createEthHeader(
-        *(struct MacAddr *)destMac,
+        destMac,
         device->macAddr,
         htons((uint16_t)ethType));
 
@@ -58,37 +56,62 @@ int sendFrame(const void *buf, int len, int ethType, const void *destMac, int de
 void handleFrame(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const uint8_t *pktdata)
 {
     /* Extract the frame header and data separately */
-    int deviceDescriptor = (int)(uint64_t)user_data;
+    struct Device *device = (struct Device *)user_data;
     struct EthHeader hdr = *(struct EthHeader *)pktdata;
     hdr.type = ntohs(hdr.type);
     const uint8_t *data = pktdata + sizeof(struct EthHeader);
     uint32_t len = pkthdr->len - sizeof(struct EthHeader);
+    if (!macAddrEqual(hdr.desAddr, BROAD_MAC) && !macAddrEqual(hdr.desAddr, device->macAddr))
+        return;
+
+    /* IPv4 */
+    if (hdr.type == ETHTYPE_IPv4)
+        handleIPPacket(data, len, hdr, device);
+
+    /* ARP */
+    if (hdr.type == ETHTYPE_ARP)
+        handleARPPacket(data, len, hdr, device);
+
     /* Callback */
-    if (linkCallback)
-        linkCallback(data, len, deviceDescriptor, hdr);
+    for (int i = 0; i < linkCallbackCnt; i++)
+        linkCallback[i](data, len, hdr, device);
 }
 
-int receiveFrame(int deviceDescriptor, int cnt)
+int receiveFrame(struct Device *device, int cnt)
 {
-    struct Device *device = findDeviceByDescriptorRetPtr(deviceDescriptor);
-    if (device == NULL)
-    {
-        fprintf(stderr, "Device not found!\n");
-        return -1;
-    }
-    u_char *deviceDescriptor_p = (u_char *)(long)deviceDescriptor;
     int loop_forever = (cnt < 0);
     while (loop_forever || cnt > 0)
     {
-        pcap_dispatch(device->handle, 1, handleFrame, deviceDescriptor_p);
+        pcap_dispatch(device->handle, 1, handleFrame, (u_char *)device);
         cnt--;
     }
 
     return 0;
 }
 
+int loopCycle()
+{
+    static pthread_mutex_t mutex;
+    if (pthread_mutex_trylock(&mutex) == 0)
+    {
+        while (1)
+        {
+            for (struct Device *device = deviceList.head->nextPointer;
+                 device != NULL;
+                 device = device->nextPointer)
+                receiveFrame(device, 1);
+            processTask();
+        }
+        pthread_mutex_unlock(&mutex); // 释放锁
+    }
+    else
+    {
+        printf("Looping has launched!\n");
+    }
+}
+
 int setFrameReceiveCallback(frameReceiveCallback callback)
 {
-    linkCallback = callback;
+    linkCallback[linkCallbackCnt++] = callback;
     return 0;
 }

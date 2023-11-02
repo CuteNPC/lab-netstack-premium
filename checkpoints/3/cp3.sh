@@ -1,0 +1,1 @@
+sudo build/test/lab2/sender

@@ -10,14 +10,17 @@
 #include <stdint.h>
 #include <netinet/ether.h>
 
-#define ADDR_LEN 6
+#define MAC_ADDR_LEN 6
+#define ETHTYPE_IPv4 0x0800
+#define ETHTYPE_IPv6 0x86DD
+#define ETHTYPE_ARP 0x0806
 
 /**
  * @brief MAC address of a device
  */
 struct MacAddr
 {
-    uint8_t a[ADDR_LEN];
+    uint8_t a[MAC_ADDR_LEN];
 } __attribute__((__packed__));
 
 /**
@@ -43,12 +46,17 @@ struct EthHeader createEthHeader(struct MacAddr desAddr,
                                  struct MacAddr srcAddr,
                                  uint16_t type);
 
+int macAddrEqual(struct MacAddr a, struct MacAddr b);
+
+extern struct MacAddr BROAD_MAC;
+extern struct MacAddr ZREO_MAC;
+
 /**
  * @brief Print the MAC address
  *
  * @param addr MAC address
  *
  */
-void printMacAddr(void *addr);
+void printMacAddr(struct MacAddr desAddr);
 
 #endif
