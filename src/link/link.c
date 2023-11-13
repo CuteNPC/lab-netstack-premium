@@ -9,10 +9,11 @@
 
 int initLinkLayer(int addAllDev)
 {
-    memset((void *)&BROAD_MAC, 0xff, sizeof(BROAD_MAC));
     static int _initialized = 0;
     if (_initialized == 1)
         return 1;
+    
+    memset((void *)&BROAD_MAC, 0xff, sizeof(BROAD_MAC));
 
     deviceList.head = (struct Device *)malloc(sizeof(struct Device));
     if (deviceList.head == NULL)

@@ -1,0 +1,64 @@
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.0  0.0   2324   116 ?        Sl   12:36   0:00 /init
+root         4  0.0  0.0   2324     0 ?        Sl   12:36   0:00 plan9 --control-socket 5 --log-level 4 --server-fd 6 --pipe-fd 8 --log-truncate
+root        11  0.0  0.0   2340     0 ?        Ss   12:36   0:00 /init
+root        12  0.0  0.0   2340     0 ?        S    12:36   0:00 /init
+mawenhan    13  0.0  0.0   2888     0 pts/0    Ss+  12:36   0:00 sh -c "$VSCODE_WSL_EXT_LOCATION/scripts/wslServer.sh" 704ed70d4fd1c6bd6342c436f1ede30d1cff4710 stable code-server .vscode-server --host=127.0.0.1 --port=0 --connection-token=426038416-787635345-3364686378-495518998 --use-host-proxy --without-browser-env-var --disable-websocket-compression --accept-server-license-terms --telemetry-level=all
+mawenhan    14  0.0  0.0   2888     0 pts/0    S+   12:36   0:00 sh /mnt/c/Users/mawenhan/.vscode/extensions/ms-vscode-remote.remote-wsl-0.77.0/scripts/wslServer.sh 704ed70d4fd1c6bd6342c436f1ede30d1cff4710 stable code-server .vscode-server --host=127.0.0.1 --port=0 --connection-token=426038416-787635345-3364686378-495518998 --use-host-proxy --without-browser-env-var --disable-websocket-compression --accept-server-license-terms --telemetry-level=all
+mawenhan    19  0.0  0.0   2888     0 pts/0    S+   12:36   0:00 sh /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/bin/code-server --host=127.0.0.1 --port=0 --connection-token=426038416-787635345-3364686378-495518998 --use-host-proxy --without-browser-env-var --disable-websocket-compression --accept-server-license-terms --telemetry-level=all
+mawenhan    23  0.3  3.0 1127436 243536 pts/0  Sl+  12:36   2:01 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/out/server-main.js --host=127.0.0.1 --port=0 --connection-token=426038416-787635345-3364686378-495518998 --use-host-proxy --without-browser-env-var --disable-websocket-compression --accept-server-license-terms --telemetry-level=all
+mawenhan    34  0.2  0.6 996024 52296 pts/0    Sl+  12:36   1:40 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/out/bootstrap-fork --type=ptyHost --logsPath /home/mawenhan/.vscode-server/data/logs/20231112T123611
+root        45  0.0  0.0   2332     0 ?        Ss   12:36   0:00 /init
+root        46  0.0  0.0   2348     8 ?        S    12:36   0:01 /init
+mawenhan    47  0.0  0.8 630124 67060 pts/1    Ssl+ 12:36   0:06 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node -e  const net = require('net'); process.stdin.pause(); const client = net.createConnection({ host: '127.0.0.1', port: 32807 }, () => { client.pipe(process.stdout); process.stdin.pipe(client); }); client.on('close', function (hadError) { console.error(hadError ? 'Remote close with error' : 'Remote close'); process.exit(hadError ? 1 : 0); }); client.on('error', function (err) { process.stderr.write(err && (err.stack || err.message) || String(err)); });
+root        63  0.0  0.0   2332     0 ?        Ss   12:36   0:00 /init
+root        64  0.0  0.0   2348     4 ?        S    12:36   0:00 /init
+mawenhan    65  0.0  0.1 587056 13360 pts/2    Ssl+ 12:36   0:02 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node -e  const net = require('net'); process.stdin.pause(); const client = net.createConnection({ host: '127.0.0.1', port: 32807 }, () => { client.pipe(process.stdout); process.stdin.pipe(client); }); client.on('close', function (hadError) { console.error(hadError ? 'Remote close with error' : 'Remote close'); process.exit(hadError ? 1 : 0); }); client.on('error', function (err) { process.stderr.write(err && (err.stack || err.message) || String(err)); });
+mawenhan    72  0.0  0.0 704652  5328 pts/0    Sl+  12:36   0:01 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/out/bootstrap-fork --type=fileWatcher
+mawenhan   145  0.1  1.0 1271000 82772 pts/0   Sl+  12:36   0:37 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/out/bootstrap-fork --type=extensionHost --transformURIs --useHostProxy=true
+mawenhan   175  0.0  0.0 130860   452 pts/0    Sl+  12:36   0:06 /home/mawenhan/.vscode-server/extensions/ms-vscode.cpptools-1.17.5-linux-x64/bin/cpptools
+mawenhan   296  0.0  0.0 589820  5692 pts/0    Sl+  12:36   0:00 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/extensions/json-language-features/server/dist/node/jsonServerMain --node-ipc --clientProcessId=145
+mawenhan   442  0.0  0.0 4289324    8 pts/0    Sl+  12:36   0:01 /home/mawenhan/.vscode-server/extensions/ms-vscode.cpptools-1.17.5-linux-x64/bin/cpptools-srv 175 {D3CABB71-35C8-4937-955D-54D4E0984BE8}
+root       466  0.0  0.0   2332     0 ?        Ss   12:39   0:00 /init
+root       467  0.0  0.0   2348     4 ?        S    12:39   0:04 /init
+mawenhan   468  0.0  0.6 616292 52820 pts/3    Ssl+ 12:39   0:13 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node -e  const net = require('net'); process.stdin.pause(); const client = net.createConnection({ host: '127.0.0.1', port: 32807 }, () => { client.pipe(process.stdout); process.stdin.pipe(client); }); client.on('close', function (hadError) { console.error(hadError ? 'Remote close with error' : 'Remote close'); process.exit(hadError ? 1 : 0); }); client.on('error', function (err) { process.stderr.write(err && (err.stack || err.message) || String(err)); });
+root       475  0.0  0.0   2332     0 ?        Ss   12:39   0:00 /init
+root       476  0.0  0.0   2348     8 ?        S    12:39   0:10 /init
+mawenhan   477  0.1  0.3 605292 29496 pts/4    Ssl+ 12:39   0:37 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node -e  const net = require('net'); process.stdin.pause(); const client = net.createConnection({ host: '127.0.0.1', port: 32807 }, () => { client.pipe(process.stdout); process.stdin.pipe(client); }); client.on('close', function (hadError) { console.error(hadError ? 'Remote close with error' : 'Remote close'); process.exit(hadError ? 1 : 0); }); client.on('error', function (err) { process.stderr.write(err && (err.stack || err.message) || String(err)); });
+mawenhan   484  0.6  2.0 1331844 160336 pts/0  Sl+  12:39   3:41 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/out/bootstrap-fork --type=extensionHost --transformURIs --useHostProxy=true
+mawenhan   499  0.0  0.1 836168 15528 pts/0    Sl+  12:39   0:02 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/out/bootstrap-fork --type=fileWatcher
+mawenhan   527  1.9  1.9 225480 158996 pts/0   Sl+  12:39  11:34 /home/mawenhan/.vscode-server/extensions/ms-vscode.cpptools-1.17.5-linux-x64/bin/cpptools
+mawenhan   548  0.0  0.0   6516  3272 pts/5    Ss   12:39   0:00 /bin/bash --init-file /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/out/vs/workbench/contrib/terminal/browser/media/shellIntegration-bash.sh
+mawenhan 11037  0.0  0.7 621192 63580 pts/0    Sl+  13:08   0:14 /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/node /home/mawenhan/.vscode-server/bin/704ed70d4fd1c6bd6342c436f1ede30d1cff4710/extensions/json-language-features/server/dist/node/jsonServerMain --node-ipc --clientProcessId=484
+mawenhan 12017  0.0  0.0   6232  2744 pts/12   Ss   19:02   0:00 /bin/bash
+mawenhan 12137  0.0  0.0   6232  2796 pts/13   Ss   19:03   0:00 /bin/bash
+mawenhan 12685  0.3  0.3 4277760 29072 pts/0   Sl+  21:39   0:08 /home/mawenhan/.vscode-server/extensions/ms-vscode.cpptools-1.17.5-linux-x64/bin/cpptools-srv 527 {A3DB6A45-2127-4F01-8F5C-5AB7E94C15A3}
+mawenhan 16332  0.0  0.0   6232  2344 pts/8    Ss+  17:43   0:00 /bin/bash
+mawenhan 16447  0.0  0.0   6232   120 pts/9    Ss+  17:43   0:00 /bin/bash
+root     17230  0.0  0.0   8168     4 ?        S    17:45   0:00 dbus-launch --autolaunch e8f367cb250ed086d839bc4964003e45 --binary-syntax --close-stderr
+root     17231  0.0  0.0   8296    96 ?        Ss   17:45   0:00 /usr/bin/dbus-daemon --syslog-only --fork --print-pid 5 --print-address 7 --session
+mawenhan 23337  0.6  0.8 3731384 64576 pts/0   Sl+  22:19   0:00 /home/mawenhan/.vscode-server/extensions/ms-vscode.cpptools-1.17.5-linux-x64/debugAdapters/bin/OpenDebugAD7
+mawenhan 23355  0.0  0.0   2892  1064 pts/12   S+   22:19   0:00 /bin/sh /tmp/Microsoft-MIEngine-Cmd-cfci0kpx.kbw
+mawenhan 23357  0.0  0.0   2892  1064 pts/12   S    22:19   0:00 /bin/sh /home/mawenhan/lab-netstack-premium/gdb2.sh --interpreter=mi --tty=/dev/pts/12
+root     23359  0.0  0.0   8920  5420 pts/12   S    22:19   0:00 sudo -S bash ./execNS ns2 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/12
+root     23360  0.0  0.0   8920   888 pts/10   Ss+  22:19   0:00 sudo -S bash ./execNS ns2 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/12
+root     23361  0.0  0.0   4780  3264 pts/10   S    22:19   0:00 bash ./execNS ns2 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/12
+root     23363  0.0  0.0   4780  3332 pts/10   S    22:19   0:00 /bin/bash ./vdo ip netns exec ns2 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/12
+root     23365  0.0  0.0   8912  5596 pts/10   S    22:19   0:00 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/12
+root     23366  0.0  0.0   8912   884 pts/11   Ss+  22:19   0:00 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/12
+root     23367  0.1  0.7 1287368 57412 pts/11  Sl   22:19   0:00 /usr/bin/gdb --interpreter=mi --tty=/dev/pts/12
+root     23402  198  0.0  84920  2020 ?        Rsl  22:19   4:00 /home/mawenhan/lab-netstack-premium/build/test/lab3/perf_server
+mawenhan 23426  0.6  0.7 3731316 61784 pts/0   Sl+  22:19   0:00 /home/mawenhan/.vscode-server/extensions/ms-vscode.cpptools-1.17.5-linux-x64/debugAdapters/bin/OpenDebugAD7
+mawenhan 23462  0.0  0.0   2892   992 pts/13   S+   22:19   0:00 /bin/sh /tmp/Microsoft-MIEngine-Cmd-kcrswtlb.3kw
+mawenhan 23464  0.0  0.0   2892   944 pts/13   S    22:19   0:00 /bin/sh /home/mawenhan/lab-netstack-premium/gdb1.sh --interpreter=mi --tty=/dev/pts/13
+root     23466  0.0  0.0   8924  5472 pts/13   S    22:19   0:00 sudo -S bash ./execNS ns1 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/13
+root     23467  0.0  0.0   8924   892 pts/14   Ss+  22:19   0:00 sudo -S bash ./execNS ns1 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/13
+root     23468  0.0  0.0   4780  3256 pts/14   S    22:19   0:00 bash ./execNS ns1 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/13
+root     23470  0.0  0.0   4780  3348 pts/14   S    22:19   0:00 /bin/bash ./vdo ip netns exec ns1 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/13
+root     23472  0.0  0.0   8916  5556 pts/14   S    22:19   0:00 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/13
+root     23473  0.0  0.0   8916   888 pts/15   Ss+  22:19   0:00 sudo /usr/bin/gdb --interpreter=mi --tty=/dev/pts/13
+root     23474  0.1  0.7 1287372 58192 pts/15  Sl   22:19   0:00 /usr/bin/gdb --interpreter=mi --tty=/dev/pts/13
+root     23496  198  0.0  85204  7484 ?        Rsl  22:19   3:55 /home/mawenhan/lab-netstack-premium/build/test/lab3/perf_client 10.100.1.2
+mawenhan 24046  0.1  0.2 1243756 21016 pts/0   Sl+  22:20   0:00 /home/mawenhan/.wakatime/wakatime-cli-linux-amd64 --entity /home/mawenhan/lab-netstack-premium/out.txt --plugin "vscode/1.77.3 vscode-wakatime/24.4.0" --lineno 1 --cursorpos 1 --lines-in-file 34 --category debugging --alternate-project lab-netstack-premium --project-folder /home/mawenhan/lab-netstack-premium
+mawenhan 24135  0.0  0.0   7484  3240 pts/5    R+   22:21   0:00 ps aux
+mawenhan 28401  0.0  0.0 4291484    0 pts/0    Sl+  14:57   0:01 /home/mawenhan/.vscode-server/extensions/ms-vscode.cpptools-1.17.5-linux-x64/bin/cpptools-srv 175 {38521C92-9C54-4434-98AC-72963FB597BE}

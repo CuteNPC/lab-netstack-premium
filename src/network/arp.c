@@ -110,15 +110,17 @@ void insertARPNode(struct ARPNode arpNode)
     pthread_mutex_unlock(&arpMutex);
 }
 
-void handleARPPacket(const uint8_t *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device)
+int handleARPPacket(const void *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device)
 {
-    struct ARPPacket arpPacket = *(struct ARPPacket *)packet;
+    if (ethHdr.type != ETHTYPE_ARP)
+        return -1;
 
+    struct ARPPacket arpPacket = *(struct ARPPacket *)packet;
     if (!(arpPacket.hType == htons(0x0001) &&
           arpPacket.pType == htons(0x0800) &&
           arpPacket.hLen == 6 &&
           arpPacket.pLen == 4))
-        return;
+        return -1;
 
     if (arpPacket.code == 1)
     {
@@ -137,6 +139,7 @@ void handleARPPacket(const uint8_t *packet, uint32_t pktlen, struct EthHeader et
         arpNode.nextPointer = NULL;
         insertARPNode(arpNode);
     }
+    return 0;
 }
 
 int initArpList()
@@ -153,6 +156,7 @@ int initArpList()
     _initialized = 1;
     arpList.head->nextPointer = NULL;
     arpList.tail = arpList.head;
+    setFrameReceiveCallback(handleARPPacket);
     pthread_mutex_init(&arpMutex, NULL);
     return 0;
 }
@@ -170,8 +174,7 @@ int queryARPList(IPAddr ipAddr, struct MacAddr *macAddr)
             return 0;
             *macAddr = node->macAddr;
         }
-    
+
     pthread_mutex_unlock(&arpMutex);
     return -1;
 }
-

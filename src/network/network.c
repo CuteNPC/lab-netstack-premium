@@ -16,6 +16,8 @@ int initNetworkLayer()
 {
     initLinkLayer(1);
     initArpList();
-    initRouteTable();
+    initRouteTable(1);
     initResendIPTaskList();
+    setLoopTask(processResendIPTask);
+    setFrameReceiveCallback(handleIPPacket);
 }

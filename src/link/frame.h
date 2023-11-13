@@ -9,6 +9,7 @@
 #include <pcap.h>
 #include "link/ethheader.h"
 #include "link/device.h"
+#include "utils/callbacklist.h"
 
 /**
  * @brief Process the dataload upon receiving it.
@@ -23,8 +24,7 @@
  */
 typedef int (*frameReceiveCallback)(const void *, uint32_t, struct EthHeader, struct Device *);
 
-extern frameReceiveCallback linkCallback[64];
-extern int linkCallbackCnt;
+extern struct CallbackList linkCallbackList;
 
 int sendFrame(const void *buf, int len, int ethtype, struct MacAddr destMac, struct Device *);
 
@@ -45,7 +45,7 @@ int receiveFrame(struct Device *device, int cnt);
  * @return 0 on success , -1 on error.
  * @see frameReceiveCallback
  */
-int setFrameReceiveCallback(frameReceiveCallback callback);
+void setFrameReceiveCallback(frameReceiveCallback callback);
 
 int loopCycle();
 

@@ -11,9 +11,9 @@
 #include <arpa/inet.h>
 #include <time.h>
 
-const double broadInterval = 0.2;
-const double updateInterval = 0.3;
-const double printInterval = 1;
+const double broadInterval = 3;
+const double updateInterval = 5;
+const double printInterval = 8;
 
 struct RouteEntry *manRouteTable;
 uint32_t manRouteTableCnt;
@@ -25,6 +25,8 @@ struct RouteEntry *tmpRouteTable;
 uint32_t tmpRouteTableCnt;
 
 pthread_mutex_t tableMutex;
+
+int routeStop;
 
 int compareRouteEntries(const void *a, const void *b);
 void removeDuplicates(struct RouteEntry *entries, int *numEntries);
@@ -50,7 +52,7 @@ int addDefaultRouteTable(struct RouteEntry **theRouteTable, int *theRouteTableCn
     }
 }
 
-int initRouteTable()
+int initRouteTable(int enableAutoRoute)
 {
     static int _initialized = 0;
     if (_initialized == 1)
@@ -58,7 +60,12 @@ int initRouteTable()
     initLinkLayer(1);
     pthread_mutex_init(&tableMutex, NULL);
     addDefaultRouteTable(&onlineRouteTable, &onlineRouteTableCnt);
-
+    if (enableAutoRoute)
+    {
+        setLoopTask(broadcastRouteTable);
+        setLoopTask(updateRouteTable);
+        setIPPacketReceiveCallback(handleRouteTable);
+    }
     tmpRouteTable = NULL;
     tmpRouteTableCnt = 0;
 
@@ -66,8 +73,11 @@ int initRouteTable()
     return 0;
 }
 
-int handleRouteTable(const void *buf, int len, struct IpHeader ipHeader, struct Device *device)
+int handleRouteTable(const void *buf, uint32_t len, struct IpHeader ipHeader, struct Device *device)
 {
+    if (ipHeader.protocol != 210)
+        return -1;
+
     pthread_mutex_lock(&tableMutex);
     int newEntryCnt = (len - MAC_ADDR_LEN) / sizeof(struct RouteEntry);
     struct MacAddr macAddr = *(struct MacAddr *)(buf + len - MAC_ADDR_LEN);
@@ -85,18 +95,15 @@ int handleRouteTable(const void *buf, int len, struct IpHeader ipHeader, struct 
     return 1;
 }
 
-int broadcastRouteTable()
+void broadcastRouteTable()
 {
     static double lastBroad = -INFINITY;
-
-    pthread_mutex_lock(&tableMutex);
     double nowTime = getSecondTime();
     if (nowTime - broadInterval < lastBroad)
-    {
-        pthread_mutex_unlock(&tableMutex);
-        return 0;
-    }
+        return;
     lastBroad = nowTime;
+
+    pthread_mutex_lock(&tableMutex);
     int tableSize = sizeof(struct RouteEntry) * onlineRouteTableCnt;
     void *buf = malloc(tableSize + MAC_ADDR_LEN);
     memcpy(buf, onlineRouteTable, tableSize);
@@ -109,41 +116,43 @@ int broadcastRouteTable()
         sendIPPacket(device->ipAddr, BROAD_IP, 210, buf, tableSize + MAC_ADDR_LEN, 0);
     }
     pthread_mutex_unlock(&tableMutex);
-    return 1;
+    return;
 }
 
-int updateRouteTable()
+void updateRouteTable()
 {
     static double lastUpdate = -INFINITY;
-
-    pthread_mutex_lock(&tableMutex);
     double nowTime = getSecondTime();
     if (nowTime - updateInterval < lastUpdate)
-    {
-        pthread_mutex_unlock(&tableMutex);
-        return 0;
-    }
+        return;
     lastUpdate = nowTime;
 
-    addDefaultRouteTable(&tmpRouteTable, &tmpRouteTableCnt);
-    qsort(tmpRouteTable, tmpRouteTableCnt, sizeof(struct RouteEntry), compareRouteEntries);
-    removeDuplicates(tmpRouteTable, &tmpRouteTableCnt);
+    pthread_mutex_lock(&tableMutex);
+    if (onlineRouteTableCnt <= 1)
+    {
+        addDefaultRouteTable(&tmpRouteTable, &tmpRouteTableCnt);
+        qsort(tmpRouteTable, tmpRouteTableCnt, sizeof(struct RouteEntry), compareRouteEntries);
+        removeDuplicates(tmpRouteTable, &tmpRouteTableCnt);
 
-    fflush(stdout);
-    struct RouteEntry *newRouteTable = (struct RouteEntry *)malloc(tmpRouteTableCnt * sizeof(struct RouteEntry));
-    int newRouteTableCnt = tmpRouteTableCnt;
-    memcpy(newRouteTable, tmpRouteTable, tmpRouteTableCnt * sizeof(struct RouteEntry));
+        fflush(stdout);
+        struct RouteEntry *newRouteTable = (struct RouteEntry *)malloc(tmpRouteTableCnt * sizeof(struct RouteEntry));
+        int newRouteTableCnt = tmpRouteTableCnt;
+        memcpy(newRouteTable, tmpRouteTable, tmpRouteTableCnt * sizeof(struct RouteEntry));
 
-    free(onlineRouteTable);
-    onlineRouteTable = newRouteTable;
-    onlineRouteTableCnt = newRouteTableCnt;
+        free(onlineRouteTable);
+        onlineRouteTable = newRouteTable;
+        onlineRouteTableCnt = newRouteTableCnt;
 
-    free(tmpRouteTable);
-    tmpRouteTable = NULL;
-    tmpRouteTableCnt = 0;
-
+        free(tmpRouteTable);
+        tmpRouteTable = NULL;
+        tmpRouteTableCnt = 0;
+    }
+    else
+    {
+        routeStop = 1;
+    }
     pthread_mutex_unlock(&tableMutex);
-    return 1;
+    return;
 }
 
 int compareRouteEntries(const void *a, const void *b)
@@ -247,16 +256,12 @@ int setRoutingTable(uint32_t dest, uint32_t mask,
 void printRoute()
 {
     static double lastPrint = -INFINITY;
-
-    pthread_mutex_lock(&tableMutex);
     double nowTime = getSecondTime();
     if (nowTime - printInterval < lastPrint)
-    {
-        pthread_mutex_unlock(&tableMutex);
         return;
-    }
     lastPrint = nowTime;
 
+    pthread_mutex_lock(&tableMutex);
     time_t rawtime;
     time(&rawtime);
     printf("Time: %s", asctime(localtime(&rawtime)));

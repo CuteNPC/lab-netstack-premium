@@ -31,13 +31,13 @@ struct ResendIPTaskList
 extern struct ResendIPTaskList resendIPTaskList;
 
 
-typedef int (*IPPacketReceiveCallback)(const void *buf, int len, struct IpHeader, struct Device *);
+typedef int (*IPPacketReceiveCallback)(const void *buf, uint32_t len, struct IpHeader, struct Device *);
 
 extern IPPacketReceiveCallback networkCallBack[64];
 extern int networkCallBackCnt;
 int initResendIPTaskList();
 
-int processResendIPTask();
+void processResendIPTask();
 
 int sendIPPacket(const uint32_t src, const uint32_t dest,
                  int proto, const void *buf, int len, int noRetry);
@@ -46,6 +46,6 @@ int sendIPPacket(const uint32_t src, const uint32_t dest,
 int setIPPacketReceiveCallback(IPPacketReceiveCallback callback);
 
 
-void handleIPPacket(const uint8_t *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device);
+int handleIPPacket(const void *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device);
 
 #endif

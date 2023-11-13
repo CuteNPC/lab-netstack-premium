@@ -2,9 +2,9 @@
 
 CC = gcc
 CFLAG = -g -I../../src
-HEADER = debug.h error.h time.h
+HEADER = debug.h error.h time.h callbacklist.h
 OBJPATH = ../../build/utils
-TARGET = ${OBJPATH}/debug.o ${OBJPATH}/error.o ${OBJPATH}/time.o
+TARGET = ${OBJPATH}/debug.o ${OBJPATH}/error.o ${OBJPATH}/time.o ${OBJPATH}/callbacklist.o
 
 all: $(TARGET)
 
@@ -19,6 +19,9 @@ ${OBJPATH}/error.o        : $(HEADER) error.c    ${OBJPATH}
 
 ${OBJPATH}/time.o        : $(HEADER) time.c    ${OBJPATH}
 	$(CC) $(CFLAG) -c time.c -o ${OBJPATH}/time.o
+
+${OBJPATH}/callbacklist.o       : $(HEADER) callbacklist.c   ${OBJPATH}
+	$(CC) $(CFLAG) -c callbacklist.c -o ${OBJPATH}/callbacklist.o
 
 clean:
 	rm -r $(OBJPATH)

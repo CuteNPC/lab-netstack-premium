@@ -2,8 +2,9 @@
 #include "utils/time.h"
 #include "network/route.h"
 #include "network/ippacket.h"
+#include "utils/callbacklist.h"
 
-void (*loopTaskCallback)(void) = NULL;
+struct CallbackList timerCallbackList;
 
 double getSecondTime()
 {
@@ -13,16 +14,23 @@ double getSecondTime()
     return seconds;
 }
 
-int setLoopTask(void (*callback)(void))
+void setLoopTask(void (*callback)(void))
 {
-    loopTaskCallback = callback;
+    static int _initialized = 0;
+    if (_initialized == 0)
+    {
+        initCallbackList(&timerCallbackList);
+        _initialized = 1;
+    }
+    insertCallback(&timerCallbackList, (void *)callback);
 }
 
-int processTask()
+void processTask()
 {
-    broadcastRouteTable();
-    updateRouteTable();
-    processResendIPTask();
-    if (loopTaskCallback)
-        loopTaskCallback();
+    if (!timerCallbackList.head)
+        return;
+    for (struct CallbackNode *p = timerCallbackList.head->next;
+         p != NULL;
+         p = p->next)
+        ((void (*)(void))p->funcPtr)();
 }

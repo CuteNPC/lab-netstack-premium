@@ -5,8 +5,8 @@
 
 double getSecondTime();
 
-int processTask();
+void processTask();
 
-int setLoopTask(void (*callback)(void));
+void setLoopTask(void (*callback)(void));
 
 #endif

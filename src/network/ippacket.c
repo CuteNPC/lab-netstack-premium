@@ -17,8 +17,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-IPPacketReceiveCallback networkCallBack[64];
-int networkCallBackCnt;
+struct CallbackList networkCallbackList;
 
 struct ResendIPTaskList resendIPTaskList;
 pthread_mutex_t resendTaskListMutex;
@@ -33,8 +32,24 @@ int initResendIPTaskList()
     return 0;
 }
 
+
 int setResendIPTask(const uint32_t src, const uint32_t dest,
-                    int proto, const void *buf, int len);
+                    int proto, const void *buf, int len)
+{
+    struct ResendIPTask *task = (struct ResendIPTask *)malloc(sizeof(struct ResendIPTask));
+
+    task->buf = buf;
+    task->dest = dest;
+    task->len = len;
+    task->proto = proto;
+    task->src = src;
+    task->nextPointer = NULL;
+
+    pthread_mutex_lock(&resendTaskListMutex);
+    resendIPTaskList.tail->nextPointer = task;
+    resendIPTaskList.tail = task;
+    pthread_mutex_unlock(&resendTaskListMutex);
+}
 
 int sendIPPacket(const uint32_t src, const uint32_t dest,
                  int proto, const void *buf, int len, int noRetry)
@@ -76,25 +91,7 @@ int sendIPPacket(const uint32_t src, const uint32_t dest,
     return 0;
 }
 
-int setResendIPTask(const uint32_t src, const uint32_t dest,
-                    int proto, const void *buf, int len)
-{
-    struct ResendIPTask *task = (struct ResendIPTask *)malloc(sizeof(struct ResendIPTask));
-
-    task->buf = buf;
-    task->dest = dest;
-    task->len = len;
-    task->proto = proto;
-    task->src = src;
-    task->nextPointer = NULL;
-
-    pthread_mutex_lock(&resendTaskListMutex);
-    resendIPTaskList.tail->nextPointer = task;
-    resendIPTaskList.tail = task;
-    pthread_mutex_unlock(&resendTaskListMutex);
-}
-
-int processResendIPTask()
+void processResendIPTask()
 {
     struct ResendIPTask *task;
     int run = 0;
@@ -106,6 +103,7 @@ int processResendIPTask()
         resendIPTaskList.head->nextPointer = task->nextPointer;
         if (task == resendIPTaskList.tail)
             resendIPTaskList.tail = resendIPTaskList.head;
+        run = 1;
     }
 
     pthread_mutex_unlock(&resendTaskListMutex);
@@ -115,7 +113,13 @@ int processResendIPTask()
 
 int setIPPacketReceiveCallback(IPPacketReceiveCallback callback)
 {
-    networkCallBack[networkCallBackCnt++] = callback;
+    static int _initialized = 0;
+    if (_initialized == 0)
+    {
+        initCallbackList(&networkCallbackList);
+        _initialized = 1;
+    }
+    insertCallback(&networkCallbackList, (void *)callback);
 }
 
 int isMyPacket(struct IpHeader ipHeader)
@@ -148,8 +152,10 @@ int deliverIPPacket(const uint8_t *packet, uint32_t pktlen, IPAddr ip)
  * @param cnt The number of Ethernet frames to receive.
  * @return 0 on success , -1 on error.
  */
-void handleIPPacket(const uint8_t *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device)
+int handleIPPacket(const void *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device)
 {
+    if (ethHdr.type != ETHTYPE_IPv4)
+        return -1;
     /* Extract the frame header and data separately */
     struct IpHeader hdr = *(struct IpHeader *)packet;
     const uint8_t *data = packet + sizeof(struct IpHeader);
@@ -158,9 +164,12 @@ void handleIPPacket(const uint8_t *packet, uint32_t pktlen, struct EthHeader eth
     if (!isMyPacket(hdr))
         deliverIPPacket(packet, pktlen, hdr.dst);
 
-    if (hdr.protocol == 210)
-        handleRouteTable(data, len, hdr, device);
-    /* Callback */
-    for (int i = 0; i < networkCallBackCnt; i++)
-        networkCallBack[i](data, len, hdr, device);
+    if (!networkCallbackList.head)
+        return -1;
+
+    for (struct CallbackNode *p = networkCallbackList.head->next;
+         p != NULL;
+         p = p->next)
+        ((IPPacketReceiveCallback)p->funcPtr)(data, len, hdr, device);
+    return 0;
 }

@@ -3,7 +3,27 @@
 CC = gcc
 CFLAG = -g -I../../../src
 BUILDPATH = ../../../build
-SRCOBJ = $(BUILDPATH)/link/device.o $(BUILDPATH)/link/ethheader.o $(BUILDPATH)/link/frame.o $(BUILDPATH)/link/link.o $(BUILDPATH)/network/arp.o $(BUILDPATH)/network/ipheader.o $(BUILDPATH)/network/ippacket.o $(BUILDPATH)/network/network.o $(BUILDPATH)/network/route.o $(BUILDPATH)/utils/debug.o $(BUILDPATH)/utils/error.o $(BUILDPATH)/utils/time.o 
+
+SRCOBJ = \
+$(BUILDPATH)/link/device.o \
+$(BUILDPATH)/link/ethheader.o \
+$(BUILDPATH)/link/frame.o \
+$(BUILDPATH)/link/link.o \
+$(BUILDPATH)/network/arp.o \
+$(BUILDPATH)/network/ipheader.o \
+$(BUILDPATH)/network/ippacket.o \
+$(BUILDPATH)/network/network.o \
+$(BUILDPATH)/network/route.o \
+$(BUILDPATH)/transport/transport.o \
+$(BUILDPATH)/transport/tcpheader.o \
+$(BUILDPATH)/transport/tcphandler.o \
+$(BUILDPATH)/transport/socket.o \
+$(BUILDPATH)/transport/labsocket.o \
+$(BUILDPATH)/utils/debug.o \
+$(BUILDPATH)/utils/error.o \
+$(BUILDPATH)/utils/time.o \
+$(BUILDPATH)/utils/callbacklist.o
+
 EXEPATH = $(BUILDPATH)/test/lab2
 
 all: ${EXEPATH}/looptest ${EXEPATH}/sender ${EXEPATH}/sendercp6 ${EXEPATH}/receivercp6

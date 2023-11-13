@@ -15,12 +15,12 @@ struct RouteEntry
     struct MacAddr macAddr;
 };
 
+extern int routeStop;
+int initRouteTable(int);
 
-int initRouteTable();
-
-int handleRouteTable(const void *buf, int len, struct IpHeader ipHeader, struct Device *device);
-int broadcastRouteTable();
-int updateRouteTable();
+int handleRouteTable(const void *buf, uint32_t len, struct IpHeader ipHeader, struct Device *device);
+void broadcastRouteTable();
+void updateRouteTable();
 int queryRouteTable(IPAddr ip, struct MacAddr *macAddr, struct Device **device);
 
 

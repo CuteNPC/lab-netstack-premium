@@ -46,7 +46,7 @@ struct ARPPacket createARPPacket(uint16_t code,
                                  struct MacAddr dstHAddr,
                                  IPAddr dstPAddr);
 
-void handleARPPacket(const uint8_t *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device);
+int handleARPPacket(const void *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device);
 
 int sendARPPacket(uint16_t code,
                   struct MacAddr srcHAddr,

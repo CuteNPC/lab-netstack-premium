@@ -21,10 +21,11 @@
 #include "link/ethheader.h"
 #include "network/ippacket.h"
 #include "utils/time.h"
+#include "utils/debug.h"
 #include "network/arp.h"
+#include "utils/callbacklist.h"
 
-frameReceiveCallback linkCallback[64];
-int linkCallbackCnt;
+struct CallbackList linkCallbackList;
 
 int sendFrame(const void *buf, int len, int ethType, struct MacAddr destMac, struct Device *device)
 {
@@ -55,6 +56,7 @@ int sendFrame(const void *buf, int len, int ethType, struct MacAddr destMac, str
 
 void handleFrame(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const uint8_t *pktdata)
 {
+    debugPrint("handleFrame");
     /* Extract the frame header and data separately */
     struct Device *device = (struct Device *)user_data;
     struct EthHeader hdr = *(struct EthHeader *)pktdata;
@@ -63,18 +65,12 @@ void handleFrame(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const uin
     uint32_t len = pkthdr->len - sizeof(struct EthHeader);
     if (!macAddrEqual(hdr.desAddr, BROAD_MAC) && !macAddrEqual(hdr.desAddr, device->macAddr))
         return;
-
-    /* IPv4 */
-    if (hdr.type == ETHTYPE_IPv4)
-        handleIPPacket(data, len, hdr, device);
-
-    /* ARP */
-    if (hdr.type == ETHTYPE_ARP)
-        handleARPPacket(data, len, hdr, device);
-
-    /* Callback */
-    for (int i = 0; i < linkCallbackCnt; i++)
-        linkCallback[i](data, len, hdr, device);
+    if (!linkCallbackList.head)
+        return;
+    for (struct CallbackNode *p = linkCallbackList.head->next;
+         p != NULL;
+         p = p->next)
+        ((frameReceiveCallback)p->funcPtr)(data, len, hdr, device);
 }
 
 int receiveFrame(struct Device *device, int cnt)
@@ -110,8 +106,13 @@ int loopCycle()
     }
 }
 
-int setFrameReceiveCallback(frameReceiveCallback callback)
+void setFrameReceiveCallback(frameReceiveCallback callback)
 {
-    linkCallback[linkCallbackCnt++] = callback;
-    return 0;
+    static int _initialized = 0;
+    if (_initialized == 0)
+    {
+        initCallbackList(&linkCallbackList);
+        _initialized = 1;
+    }
+    insertCallback(&linkCallbackList, (void *)callback);
 }
