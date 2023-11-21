@@ -11,9 +11,9 @@
 #include <arpa/inet.h>
 #include <time.h>
 
-const double broadInterval = 3;
-const double updateInterval = 5;
-const double printInterval = 8;
+const double broadInterval = 1;
+const double updateInterval = 2.5;
+const double printInterval = 1.5;
 
 struct RouteEntry *manRouteTable;
 uint32_t manRouteTableCnt;
@@ -27,6 +27,8 @@ uint32_t tmpRouteTableCnt;
 pthread_mutex_t tableMutex;
 
 int routeStop;
+
+
 
 int compareRouteEntries(const void *a, const void *b);
 void removeDuplicates(struct RouteEntry *entries, int *numEntries);
@@ -119,6 +121,31 @@ void broadcastRouteTable()
     return;
 }
 
+
+void tmpPrintRoute()
+{
+    printf("+tmpPrintRoute+\n");
+    time_t rawtime;
+    time(&rawtime);
+    printf("Time: %s", asctime(localtime(&rawtime)));
+
+    for (int i = 0; i < tmpRouteTableCnt; i++)
+    {
+        struct in_addr ipAddr;
+        ipAddr.s_addr = tmpRouteTable[i].ipAddr;
+        char ipAddressStr[32];
+        inet_ntop(AF_INET, &ipAddr, ipAddressStr, sizeof(ipAddressStr));
+        printf("IP: %s   dist: %02d  device: %s", ipAddressStr, tmpRouteTable[i].dist, tmpRouteTable[i].device->deviceName);
+        printMacAddr(tmpRouteTable[i].macAddr);
+        printf("\n");
+    }
+    printf("\n");
+    fflush(stdout);
+    pthread_mutex_unlock(&tableMutex);
+    printf("-tmpPrintRoute-\n");
+}
+
+
 void updateRouteTable()
 {
     static double lastUpdate = -INFINITY;
@@ -128,11 +155,15 @@ void updateRouteTable()
     lastUpdate = nowTime;
 
     pthread_mutex_lock(&tableMutex);
-    if (onlineRouteTableCnt <= 1)
-    {
+    // if (onlineRouteTableCnt <= 1)
+    // {
+        // tmpPrintRoute();
         addDefaultRouteTable(&tmpRouteTable, &tmpRouteTableCnt);
+        // tmpPrintRoute();
         qsort(tmpRouteTable, tmpRouteTableCnt, sizeof(struct RouteEntry), compareRouteEntries);
+        // tmpPrintRoute();
         removeDuplicates(tmpRouteTable, &tmpRouteTableCnt);
+        // tmpPrintRoute();
 
         fflush(stdout);
         struct RouteEntry *newRouteTable = (struct RouteEntry *)malloc(tmpRouteTableCnt * sizeof(struct RouteEntry));
@@ -146,11 +177,11 @@ void updateRouteTable()
         free(tmpRouteTable);
         tmpRouteTable = NULL;
         tmpRouteTableCnt = 0;
-    }
-    else
-    {
-        routeStop = 1;
-    }
+    // }
+    // else
+    // {
+        // routeStop = 1;
+    // }
     pthread_mutex_unlock(&tableMutex);
     return;
 }
@@ -181,7 +212,7 @@ void removeDuplicates(struct RouteEntry *entries, int *numEntries)
         if (entries[i].ipAddr != entries[uniqueIndex - 1].ipAddr || entries[i].mask != entries[uniqueIndex - 1].mask)
             entries[uniqueIndex++] = entries[i];
         else if (entries[i].dist < entries[uniqueIndex - 1].dist)
-            entries[uniqueIndex - 1].dist = entries[i].dist;
+            entries[uniqueIndex - 1] = entries[i];
     *numEntries = uniqueIndex;
 
     int index = 0;
@@ -272,9 +303,12 @@ void printRoute()
         ipAddr.s_addr = onlineRouteTable[i].ipAddr;
         char ipAddressStr[32];
         inet_ntop(AF_INET, &ipAddr, ipAddressStr, sizeof(ipAddressStr));
-        printf("IP: %s   dist: %02d\n", ipAddressStr, onlineRouteTable[i].dist);
+        printf("IP: %s   dist: %02d  device: %s", ipAddressStr, onlineRouteTable[i].dist, onlineRouteTable[i].device->deviceName);
+        printMacAddr(onlineRouteTable[i].macAddr);
+        printf("\n");
     }
     printf("\n");
     fflush(stdout);
     pthread_mutex_unlock(&tableMutex);
 }
+

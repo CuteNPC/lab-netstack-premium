@@ -144,7 +144,6 @@ int bindLab(int socketfd, const struct sockaddr *address, socklen_t address_len)
         return -1;
     socket->srcaddr = addr->sin_addr.s_addr;
     socket->srcport = addr->sin_port;
-    /* TODO: 发现端口被占用了怎么办？？？ */
     pthread_mutex_unlock(&socket->mutex);
     return 0;
 }
@@ -166,14 +165,10 @@ int acceptLab(int socketfd, struct sockaddr *address,
               socklen_t *address_len)
 {
     initTransportLayer();
-    // debugPrint("acceptLab(%u)", socketfd);
-    // /*address有什么用？先不用*/
     struct Socket *socket = findSocket(socketfd);
     if (socket == NULL)
         return -1;
     pthread_mutex_unlock(&socket->mutex);
-    // debugPrint("accept do");
-    /*TODO: 管程并发*/
     do
     {
         pthread_mutex_lock(&socketList.mutex);
@@ -189,8 +184,6 @@ int acceptLab(int socketfd, struct sockaddr *address,
             }
         pthread_mutex_unlock(&socketList.mutex);
     } while (1);
-
-    // return -1;
 }
 
 int connectLab(int socketfd, const struct sockaddr *address,
@@ -200,34 +193,25 @@ int connectLab(int socketfd, const struct sockaddr *address,
     debugPrint("connectLab(%u)", socketfd);
     const struct sockaddr_in *address_tcp = (const struct sockaddr_in *)address;
     struct Socket *socket = findSocket(socketfd);
-    debugPrint("connectLabTest1");
     if (address_len != sizeof(struct sockaddr_in))
         return -1;
-    debugPrint("connectLabTest2");
     if (address_tcp->sin_family != AF_INET)
         return -1;
-    debugPrint("connectLabTest3");
     if (socket == NULL)
         return -1;
-    debugPrint("connectLabTest4");
     if (socket->srcport == 0)
         socket->srcport = htons(getPort());
-    debugPrint("connectLabTest5");
     if (socket->srcaddr == 0)
         socket->srcaddr = getFirstDevice()->ipAddr;
-    debugPrint("connectLabTest6");
     socket->desport = address_tcp->sin_port;
     socket->desaddr = address_tcp->sin_addr.s_addr;
     socket->seqNum = -1; // rand();
     socket->ackNum = 0;
-    debugPrint("connectLabTest7");
     struct TCPHeader tcpHeader = createTCPHeader(socket->srcport,
                                                  socket->desport,
                                                  socket->seqNum,
                                                  0,
-                                                 CT_SYN, 0x1000);
-
-    debugPrint("connectLabTest8");
+                                                 CT_SYN, 0xffff);
     sendTCPPacket(tcpHeader, socket, NULL, 0, 0);
     socket->state = ST_SYS_SENT;
     pthread_mutex_unlock(&socket->mutex);

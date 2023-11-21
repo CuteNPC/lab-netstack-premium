@@ -56,15 +56,31 @@ int sendFrame(const void *buf, int len, int ethType, struct MacAddr destMac, str
 
 void handleFrame(uint8_t *user_data, const struct pcap_pkthdr *pkthdr, const uint8_t *pktdata)
 {
-    debugPrint("handleFrame");
+    // debugPrint("handleFrame");
     /* Extract the frame header and data separately */
     struct Device *device = (struct Device *)user_data;
     struct EthHeader hdr = *(struct EthHeader *)pktdata;
     hdr.type = ntohs(hdr.type);
     const uint8_t *data = pktdata + sizeof(struct EthHeader);
     uint32_t len = pkthdr->len - sizeof(struct EthHeader);
-    if (!macAddrEqual(hdr.desAddr, BROAD_MAC) && !macAddrEqual(hdr.desAddr, device->macAddr))
+    // printf("handleFrame ");
+    // printMacAddr(hdr.desAddr);
+    // printf(" ");
+    // printMacAddr(device->macAddr);
+    // printf("\n");
+    int isMyFrame = 0;
+    if (macAddrEqual(hdr.desAddr, BROAD_MAC))
+        isMyFrame = 1;
+    for (struct Device *device = deviceList.head->nextPointer;
+         device != NULL;
+         device = device->nextPointer)
+        if (macAddrEqual(hdr.desAddr, device->macAddr))
+            isMyFrame = 1;
+    if (!isMyFrame)
+    {
+        debugPrint3("Not my Frame");
         return;
+    }
     if (!linkCallbackList.head)
         return;
     for (struct CallbackNode *p = linkCallbackList.head->next;
@@ -95,7 +111,9 @@ int loopCycle()
             for (struct Device *device = deviceList.head->nextPointer;
                  device != NULL;
                  device = device->nextPointer)
+            {
                 receiveFrame(device, 1);
+            }
             processTask();
         }
         pthread_mutex_unlock(&mutex); // 释放锁

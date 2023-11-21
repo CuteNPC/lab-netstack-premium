@@ -93,7 +93,7 @@ int __wrap_getaddrinfo(const char *node, const char *service,
                        const struct addrinfo *hints,
                        struct addrinfo **res)
 {
-    __real_getaddrinfo(node, service, hints, res);
+    return __real_getaddrinfo(node, service, hints, res);
 }
 
 int __wrap_setsockopt (int fd, int level, int optname,

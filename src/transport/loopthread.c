@@ -24,7 +24,20 @@ int TCPHandleClosed(struct Socket *socket,
                     struct TCPHeader tcpHeader,
                     struct IpHeader ipHeader)
 {
+    struct Socket tmpSocket;
+    tmpSocket.srcport = tcpHeader.desport;
+    tmpSocket.srcaddr = ipHeader.dst;
+    tmpSocket.desport = tcpHeader.srcport;
+    tmpSocket.desaddr = ipHeader.src;
     return 0;
+    struct TCPHeader tcpHeader2 = createTCPHeader(tmpSocket.srcport,
+                                                 tmpSocket.desport,
+                                                 socket->seqNum,
+                                                 socket->ackNum,
+                                                 CT_RST,
+                                                 0);
+    debugPrint2("%d,%d", tmpSocket.ecvBack, tmpSocket.recvFront);
+    sendTCPPacket(tcpHeader2, &tmpSocket, NULL, 0, 0);
 }
 
 int TCPHandleListen(struct Socket *socket,
@@ -54,6 +67,10 @@ int TCPHandleListen(struct Socket *socket,
                                                      connectSocket->ackNum,
                                                      CT_SYN | CT_ACK, 0xffff);
         sendTCPPacket(tcpHeader, connectSocket, NULL, 0, 0);
+        // sendTCPPacket(tcpHeader, connectSocket, NULL, 0, 0);
+        // sendTCPPacket(tcpHeader, connectSocket, NULL, 0, 0);
+        // sendTCPPacket(tcpHeader, connectSocket, NULL, 0, 0);
+        // sendTCPPacket(tcpHeader, connectSocket, NULL, 0, 0);
         connectSocket->state = ST_SYS_RECV;
         connectSocket->parentListenFd = socket->fd;
         pthread_mutex_unlock(&connectSocket->mutex);
@@ -167,7 +184,7 @@ int TCPHandleEstablished(struct Socket *socket,
         struct TCPHeader tcpHeader = createTCPHeader(socket->srcport,
                                                      socket->desport,
                                                      socket->seqNum,
-                                                     socket->ackNum,
+                                                     socket->ackNum + 1,
                                                      CT_ACK,
                                                      socket->recvBack - 1 - socket->recvFront);
         socket->clstate |= CL_ACK_SENT;
@@ -312,6 +329,7 @@ void asyncSendTCPPacket()
             if (it->resendTime < nowtime)
             {
                 debugPrint("asyncSendTCPPacket resend");
+                // printf("asyncSendTCPPacket resend");
                 it->resendTime = nowtime + 0.5;
                 send = 1;
                 start = it->ackBack;

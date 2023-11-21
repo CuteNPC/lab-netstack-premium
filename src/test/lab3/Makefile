@@ -37,19 +37,10 @@ $(BUILDPATH)/transport/mainthread.o \
 
 EXEPATH = $(BUILDPATH)/test/lab3
 
-all: ${EXEPATH}/mainclient ${EXEPATH}/mainserver ${EXEPATH}/echo_client ${EXEPATH}/echo_server ${EXEPATH}/perf_client ${EXEPATH}/perf_server
-	cp ../../../vnetUtils/helper/execNS	${EXEPATH}/execNS	
-	cp ../../../vnetUtils/helper/vdo    ${EXEPATH}/vdo    
-	cp ../../../vnetUtils/helper/vecho  ${EXEPATH}/vecho  
+all: ${EXEPATH}/echo_client ${EXEPATH}/echo_server ${EXEPATH}/perf_client ${EXEPATH}/slow_perf_client ${EXEPATH}/perf_server ${EXEPATH}/router
 
 ${EXEPATH} :
 	mkdir -p  ${EXEPATH}
-
-${EXEPATH}/mainclient        : mainclient.c ${EXEPATH}
-	$(CC) $(CFLAG) $(SRCOBJ) mainclient.c -lpcap -o ${EXEPATH}/mainclient
-
-${EXEPATH}/mainserver        : mainserver.c ${EXEPATH}
-	$(CC) $(CFLAG) $(SRCOBJ) mainserver.c -lpcap -o ${EXEPATH}/mainserver
 
 ${EXEPATH}/echo_client        : echo_client.c unp.c ${EXEPATH}
 	$(CC) $(CFLAG) $(WRAPFLAG) $(SRCOBJ) $(BUILDPATH)/transport/socket.o unp.c echo_client.c -lpcap -o ${EXEPATH}/echo_client
@@ -62,6 +53,12 @@ ${EXEPATH}/perf_client        : perf_client.c unp.c ${EXEPATH}
 
 ${EXEPATH}/perf_server        : perf_server.c unp.c ${EXEPATH}
 	$(CC) $(CFLAG) $(WRAPFLAG) $(SRCOBJ) $(BUILDPATH)/transport/socket.o unp.c perf_server.c -lpcap -o ${EXEPATH}/perf_server
+
+${EXEPATH}/slow_perf_client   : slow_perf_client.c unp.c ${EXEPATH}
+	$(CC) $(CFLAG) $(WRAPFLAG) $(SRCOBJ) $(BUILDPATH)/transport/socket.o unp.c slow_perf_client.c -lpcap -o ${EXEPATH}/slow_perf_client
+
+${EXEPATH}/router        : router.c ${EXEPATH}
+	$(CC) $(CFLAG) $(SRCOBJ) router.c -lpcap -o ${EXEPATH}/router
 
 clean:
 	-rm -r ${EXEPATH}

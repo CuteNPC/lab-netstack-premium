@@ -4,6 +4,7 @@
 
 #define DEBUGx
 #define DEBUG2x
+#define DEBUG3x
 
 #ifdef DEBUG
 #define debugPrint(...)      \
@@ -25,6 +26,17 @@
     }
 #else
 #define debugPrint2(...)
+#endif // DEBUG
+
+#ifdef DEBUG3
+#define debugPrint3(...)      \
+    {                         \
+        printf("[DEBUG3]: "); \
+        printf(__VA_ARGS__);  \
+        printf("\n");         \
+    }
+#else
+#define debugPrint3(...)
 #endif // DEBUG
 
 int debugPrintState(int num, int);

@@ -48,4 +48,6 @@ int setIPPacketReceiveCallback(IPPacketReceiveCallback callback);
 
 int handleIPPacket(const void *packet, uint32_t pktlen, struct EthHeader ethHdr, struct Device *device);
 
+void setRandomDropRate(uint32_t num);
+
 #endif

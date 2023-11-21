@@ -16,6 +16,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include "utils/debug.h"
+
+uint32_t random_drop = 0;
 
 struct CallbackList networkCallbackList;
 
@@ -31,7 +34,6 @@ int initResendIPTaskList()
     pthread_mutex_init(&resendTaskListMutex, NULL);
     return 0;
 }
-
 
 int setResendIPTask(const uint32_t src, const uint32_t dest,
                     int proto, const void *buf, int len)
@@ -80,7 +82,12 @@ int sendIPPacket(const uint32_t src, const uint32_t dest,
     if (queryRouteTable(dest, &dstmac, &device))
     {
         if (queryARPList(dest, &dstmac))
+        {
+            // debugPrint3("IP Send: %s ",device->deviceName);
+            // printMacAddr(dstmac);
+            // debugPrint3("\n");
             sendFrame(packet, len + sizeof(struct IpHeader), ETHTYPE_IPv4, dstmac, device);
+        }
         else if (!noRetry)
             setResendIPTask(src, dest, proto, buf, len);
         else
@@ -136,12 +143,34 @@ int isMyPacket(struct IpHeader ipHeader)
 
 int deliverIPPacket(const uint8_t *packet, uint32_t pktlen, IPAddr ip)
 {
+    // fflush(stdout);
     struct MacAddr dstmac;
     struct Device *device;
     if (queryRouteTable(ip, &dstmac, &device))
+    {
+        // fflush(stdout);
         sendFrame(packet, pktlen, ETHTYPE_IPv4, dstmac, device);
+        // debugPrint3("ipdeliver: %s",device->deviceName);
+    }
     else
         return -1;
+    return 0;
+}
+
+int randomDrop(const void *data, struct IpHeader ipHdr)
+{
+    if (((char *)data)[13] == 0 && ipHdr.protocol == IPPROTO_TCP)
+    {
+        uint32_t rands = rand() % 100;
+        // printf("%d\n",rands);
+        if (rands < random_drop)
+        {
+            printf("Packet Loss Happens!\n");
+            // printf("loss!");
+            // fflush(stdout);
+            return 1;
+        }
+    }
     return 0;
 }
 
@@ -160,10 +189,16 @@ int handleIPPacket(const void *packet, uint32_t pktlen, struct EthHeader ethHdr,
     struct IpHeader hdr = *(struct IpHeader *)packet;
     const uint8_t *data = packet + sizeof(struct IpHeader);
     uint32_t len = pktlen - sizeof(struct IpHeader);
+    if(hdr.protocol == 6)
+        debugPrint3("A tcp Packet!");
+    if (randomDrop(data, hdr))
+        return 0;
 
     if (!isMyPacket(hdr))
+    {
         deliverIPPacket(packet, pktlen, hdr.dst);
-
+        return 0;
+    }
     if (!networkCallbackList.head)
         return -1;
 
@@ -172,4 +207,12 @@ int handleIPPacket(const void *packet, uint32_t pktlen, struct EthHeader ethHdr,
          p = p->next)
         ((IPPacketReceiveCallback)p->funcPtr)(data, len, hdr, device);
     return 0;
+}
+
+void setRandomDropRate(uint32_t num)
+{
+    random_drop = num;
+    if (random_drop > 100)
+        random_drop = 100;
+    printf("Set Loss Rate: %u%%\n",random_drop);
 }

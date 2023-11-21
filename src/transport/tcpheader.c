@@ -17,6 +17,7 @@ struct TCPHeader createTCPHeader(Port srcport,
     header.window = htons(window);
     /*计算checksum*/
     header.hdrLen = (5) << 4;
+    header.checkSum = 0x7859;
     header.urgPtr = 0;
     return header;
 }
